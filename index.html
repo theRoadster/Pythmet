@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Put On a Pythmet - Ponke</title>
+    <title>Coronating Wannabe Priest</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,7 +26,7 @@
             width: 90%;
             margin: 20px;
         }
-        h1 {
+        h1, h2 {
             color: #333;
         }
         .input-container {
@@ -43,6 +43,22 @@
             color: #fff;
             border-radius: 5px;
             margin-top: 10px;
+        }
+        .pythmet-selection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pythmet-thumbnail {
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .pythmet-thumbnail.selected {
+            border: 2px solid #333;
         }
         #container {
             width: 100%;
@@ -70,17 +86,23 @@
 </head>
 <body>
     <div class="container">
-        <h1>Put On a Pythmet</h1>
+        <h1>Coronating Wannabe Priest</h1>
         <div class="input-container">
             <label for="bgImageUpload" class="custom-file-upload">
                 Upload Profile Picture
             </label>
             <input type="file" id="bgImageUpload" accept="image/*">
-
-            <label for="helmetUpload" class="custom-file-upload">
-                Upload Pythmet Image
-            </label>
-            <input type="file" id="helmetUpload" accept="image/*">
+        </div>
+        <h2>Click the Pythmet of Your Choice</h2>
+        <div class="pythmet-selection">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet1.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet1.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet2.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet2.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet3.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet3.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet4.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet4.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet5.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet5.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet6.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet6.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet7.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet7.png')">
+            <img src="https://theroadster.github.io/Pythmet/Pythmet8.png" class="pythmet-thumbnail" onclick="selectPythmet('https://theroadster.github.io/Pythmet/Pythmet8.png')">
         </div>
         <div id="container"></div>
         <button onclick="saveImage()" class="button">Save Image</button>
@@ -100,121 +122,99 @@
         var helmetLayer = new Konva.Layer();
         stage.add(helmetLayer);
 
-        var transformer;
+        var transformer = new Konva.Transformer();
+        helmetLayer.add(transformer);
+
         var helmet;
         var bgImageOriginalWidth;
         var bgImageOriginalHeight;
 
         document.getElementById('bgImageUpload').addEventListener('change', function (e) {
-            var reader = new FileReader();
-            reader.onload = function (event) {
-                var img = new Image();
-                img.onload = function () {
-                    bgImageOriginalWidth = img.width;
-                    bgImageOriginalHeight = img.height;
+    var reader = new FileReader();
+    reader.onload = function (event) {
+        var img = new Image();
+        img.crossOrigin = 'Anonymous';  // Set CORS to anonymous
+        img.onload = function () {
+            bgImageOriginalWidth = img.width;
+            bgImageOriginalHeight = img.height;
 
-                    var aspectRatio = img.width / img.height;
-                    var containerWidth = document.getElementById('container').offsetWidth;
-                    var containerHeight = document.getElementById('container').offsetHeight;
+            var aspectRatio = img.width / img.height;
+            var containerWidth = document.getElementById('container').offsetWidth;
+            var containerHeight = document.getElementById('container').offsetHeight;
 
-                    var newWidth, newHeight;
-                    if (containerWidth / aspectRatio <= containerHeight) {
-                        newWidth = containerWidth;
-                        newHeight = newWidth / aspectRatio;
-                    } else {
-                        newHeight = containerHeight;
-                        newWidth = newHeight * aspectRatio;
-                    }
+            var newWidth, newHeight;
+            if (containerWidth / aspectRatio <= containerHeight) {
+                newWidth = containerWidth;
+                newHeight = newWidth / aspectRatio;
+            } else {
+                newHeight = containerHeight;
+                newWidth = newHeight * aspectRatio;
+            }
 
-                    stage.width(containerWidth);
-                    stage.height(containerHeight);
+            stage.width(containerWidth);
+            stage.height(containerHeight);
 
-                    var bgImage = new Konva.Image({
-                        image: img,
-                        x: (containerWidth - newWidth) / 2,
-                        y: (containerHeight - newHeight) / 2,
-                        width: newWidth,
-                        height: newHeight
-                    });
-                    bgImageLayer.destroyChildren(); // Clear previous image if exists
-                    bgImageLayer.add(bgImage);
-                    bgImageLayer.draw();
-                };
-                img.src = event.target.result;
+            var bgImage = new Konva.Image({
+                image: img,
+                x: (containerWidth - newWidth) / 2,
+                y: (containerHeight - newHeight) / 2,
+                width: newWidth,
+                height: newHeight
+            });
+            bgImageLayer.destroyChildren();
+            bgImageLayer.add(bgImage);
+            bgImageLayer.draw();
+        };
+        img.onerror = function() {
+            console.error("Error loading the image with CORS settings.");
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(e.target.files[0]);
+});
+
+        function selectPythmet(src) {
+            if (helmet) {
+                helmet.destroy(); // Remove previous Pythmet
+            }
+            var img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = function () {
+                helmet = new Konva.Image({
+                    image: img,
+                    x: (stage.width() / 2) - 100,
+                    y: (stage.height() / 2) - 75,
+                    width: 200,
+                    height: 150,
+                    draggable: true
+                });
+                helmetLayer.add(helmet);
+                transformer.nodes([helmet]);
+                helmetLayer.draw();
             };
-            reader.readAsDataURL(e.target.files[0]);
-        });
-
-        document.getElementById('helmetUpload').addEventListener('change', function (e) {
-            var reader = new FileReader();
-            reader.onload = function (event) {
-                var img = new Image();
-                img.onload = function () {
-                    helmet = new Konva.Image({
-                        image: img,
-                        x: stage.width() / 4,
-                        y: stage.height() / 4,
-                        width: 200,
-                        height: 150,
-                        draggable: true
-                    });
-                    transformer = new Konva.Transformer();
-                    helmetLayer.destroyChildren(); // Clear previous image if exists
-                    helmetLayer.add(helmet);
-                    helmetLayer.add(transformer);
-                    transformer.attachTo(helmet);
-                    helmetLayer.draw();
-                };
-                img.src = event.target.result;
+            img.onerror = function() {
+                console.error("Failed to load the Pythmet image with CORS settings.");
             };
-            reader.readAsDataURL(e.target.files[0]);
-        });
+            img.src = src;
+        }
 
         function saveImage() {
             transformer.detach();
-            helmetLayer.draw();
-
-            var tempStage = new Konva.Stage({
-                container: document.createElement('div'),
-                width: bgImageOriginalWidth,
-                height: bgImageOriginalHeight
+            var dataURL = stage.toDataURL({
+                pixelRatio: 3
             });
-
-            var tempBgLayer = new Konva.Layer();
-            var tempHelmetLayer = new Konva.Layer();
-
-            var bgImageElement = bgImageLayer.children[0].clone();
-            bgImageElement.x(0);
-            bgImageElement.y(0);
-            bgImageElement.width(bgImageOriginalWidth);
-            bgImageElement.height(bgImageOriginalHeight);
-            tempBgLayer.add(bgImageElement);
-
-            var helmetElement = helmet.clone();
-            helmetElement.width(helmet.width() * (bgImageOriginalWidth / stage.width()));
-            helmetElement.height(helmet.height() * (bgImageOriginalHeight / stage.height()));
-            helmetElement.x(helmet.x() * (bgImageOriginalWidth / stage.width()));
-            helmetElement.y(helmet.y() * (bgImageOriginalHeight / stage.height()));
-            tempHelmetLayer.add(helmetElement);
-
-            tempStage.add(tempBgLayer);
-            tempStage.add(tempHelmetLayer);
-
-            tempBgLayer.draw();
-            tempHelmetLayer.draw();
-
-            var dataURL = tempStage.toDataURL();
 
             var link = document.createElement('a');
             link.href = dataURL;
-            link.download = 'composite_image.png';
+            link.download = 'pythmet_image.png';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            tempStage.destroy();
-            transformer.attachTo(helmet);
-            helmetLayer.draw();
+            if (helmet) {
+                transformer.nodes([helmet]); // Reattach transformer to the existing helmet
+                helmetLayer.draw();
+            }
         }
     </script>
 </body>
