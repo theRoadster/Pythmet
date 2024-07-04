@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Put On a Pythmet - Ponke</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .input-container {
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #container {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+            background-color: #ddd;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Put On a Pythmet</h1>
+        <div class="input-container">
+            <label for="bgImageUpload" class="custom-file-upload">
+                Upload Profile Picture
+            </label>
+            <input type="file" id="bgImageUpload" accept="image/*">
+
+            <label for="helmetUpload" class="custom-file-upload">
+                Upload Pythmet Image
+            </label>
+            <input type="file" id="helmetUpload" accept="image/*">
+        </div>
+        <div id="container"></div>
+        <button onclick="saveImage()" class="button">Save Image</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/konva@9.2.2/konva.min.js"></script>
+    <script>
+        var stage = new Konva.Stage({
+            container: 'container',
+            width: document.getElementById('container').offsetWidth,
+            height: document.getElementById('container').offsetHeight
+        });
+
+        var bgImageLayer = new Konva.Layer();
+        stage.add(bgImageLayer);
+        
+        var helmetLayer = new Konva.Layer();
+        stage.add(helmetLayer);
+
+        var transformer;
+        var helmet;
+        var bgImageOriginalWidth;
+        var bgImageOriginalHeight;
+
+        document.getElementById('bgImageUpload').addEventListener('change', function (e) {
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = new Image();
+                img.onload = function () {
+                    bgImageOriginalWidth = img.width;
+                    bgImageOriginalHeight = img.height;
+
+                    var aspectRatio = img.width / img.height;
+                    var containerWidth = document.getElementById('container').offsetWidth;
+                    var containerHeight = document.getElementById('container').offsetHeight;
+
+                    var newWidth, newHeight;
+                    if (containerWidth / aspectRatio <= containerHeight) {
+                        newWidth = containerWidth;
+                        newHeight = newWidth / aspectRatio;
+                    } else {
+                        newHeight = containerHeight;
+                        newWidth = newHeight * aspectRatio;
+                    }
+
+                    stage.width(containerWidth);
+                    stage.height(containerHeight);
+
+                    var bgImage = new Konva.Image({
+                        image: img,
+                        x: (containerWidth - newWidth) / 2,
+                        y: (containerHeight - newHeight) / 2,
+                        width: newWidth,
+                        height: newHeight
+                    });
+                    bgImageLayer.destroyChildren(); // Clear previous image if exists
+                    bgImageLayer.add(bgImage);
+                    bgImageLayer.draw();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        document.getElementById('helmetUpload').addEventListener('change', function (e) {
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = new Image();
+                img.onload = function () {
+                    helmet = new Konva.Image({
+                        image: img,
+                        x: stage.width() / 4,
+                        y: stage.height() / 4,
+                        width: 200,
+                        height: 150,
+                        draggable: true
+                    });
+                    transformer = new Konva.Transformer();
+                    helmetLayer.destroyChildren(); // Clear previous image if exists
+                    helmetLayer.add(helmet);
+                    helmetLayer.add(transformer);
+                    transformer.attachTo(helmet);
+                    helmetLayer.draw();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        function saveImage() {
+            transformer.detach();
+            helmetLayer.draw();
+
+            var tempStage = new Konva.Stage({
+                container: document.createElement('div'),
+                width: bgImageOriginalWidth,
+                height: bgImageOriginalHeight
+            });
+
+            var tempBgLayer = new Konva.Layer();
+            var tempHelmetLayer = new Konva.Layer();
+
+            var bgImageElement = bgImageLayer.children[0].clone();
+            bgImageElement.x(0);
+            bgImageElement.y(0);
+            bgImageElement.width(bgImageOriginalWidth);
+            bgImageElement.height(bgImageOriginalHeight);
+            tempBgLayer.add(bgImageElement);
+
+            var helmetElement = helmet.clone();
+            helmetElement.width(helmet.width() * (bgImageOriginalWidth / stage.width()));
+            helmetElement.height(helmet.height() * (bgImageOriginalHeight / stage.height()));
+            helmetElement.x(helmet.x() * (bgImageOriginalWidth / stage.width()));
+            helmetElement.y(helmet.y() * (bgImageOriginalHeight / stage.height()));
+            tempHelmetLayer.add(helmetElement);
+
+            tempStage.add(tempBgLayer);
+            tempStage.add(tempHelmetLayer);
+
+            tempBgLayer.draw();
+            tempHelmetLayer.draw();
+
+            var dataURL = tempStage.toDataURL();
+
+            var link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'composite_image.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            tempStage.destroy();
+            transformer.attachTo(helmet);
+            helmetLayer.draw();
+        }
+    </script>
+</body>
+</html>
